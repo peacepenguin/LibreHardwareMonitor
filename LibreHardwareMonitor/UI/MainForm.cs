@@ -890,6 +890,21 @@ namespace LibreHardwareMonitor.UI
                                 };
                             }
                         }
+
+                        // new entry for the fan curve selection:
+                        ToolStripItem fancurveItem = new ToolStripMenuItem("FanCurve");
+                        controlItem.DropDownItems.Add(fancurveItem);
+
+                        // when clicked, do this:
+//                      fancurveItem.Click += delegate
+//                      {
+                            // figure out what to set for the software value from the pre-defined fan curve...
+//                          int softwareValue = ......math to find the curve value to set....
+//                          control.SetSoftware(softwareValue);
+//                        };
+
+                        // end fan curve entry
+
                         treeContextMenu.Items.Add(controlItem);
                     }
 
