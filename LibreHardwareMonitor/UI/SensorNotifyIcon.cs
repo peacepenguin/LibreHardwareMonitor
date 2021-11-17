@@ -108,8 +108,8 @@ namespace LibreHardwareMonitor.UI
                 default: baseSize = 12; break;
             }
 
-            _font = new Font(family, baseSize * width / 16.0f, GraphicsUnit.Pixel);
-            _smallFont = new Font(family, 0.75f * baseSize * width / 16.0f, GraphicsUnit.Pixel);
+            _font = new Font(family, baseSize * width / 16.0f, FontStyle.Bold, GraphicsUnit.Pixel);
+            _smallFont = new Font(family, 0.75f * baseSize * width / 16.0f, FontStyle.Bold, GraphicsUnit.Pixel);
 
             _bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             _graphics = Graphics.FromImage(_bitmap);

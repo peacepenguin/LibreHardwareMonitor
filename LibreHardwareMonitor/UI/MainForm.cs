@@ -992,6 +992,39 @@ namespace LibreHardwareMonitor.UI
             Visible = false;
             _systemTray.IsMainIconEnabled = false;
             timer.Enabled = false;
+
+            // set all fan curve controlled fans back to "default" ie. bios controlled.
+            foreach (IHardware hardware in _computer.Hardware)
+            {
+                if (string.Equals(hardware.Name, fanAhardwarename) || string.Equals(hardware.Name, fanBhardwarename))
+                {
+                    foreach (IHardware subhardware in hardware.SubHardware)
+                    {
+                        if (string.Equals(subhardware.Name, fanAsubhardwarename) || string.Equals(subhardware.Name, fanBsubhardwarename))
+                        {
+                            foreach (ISensor sensor in subhardware.Sensors)
+                            {
+                                if (string.Equals(sensor.Name, fanAcontrolname))
+                                {
+                                    if (speedchange)
+                                    {
+                                        sensor.Control.SetDefault();
+                                    }
+                                }
+                                if (string.Equals(sensor.Name, fanBcontrolname))
+                                {
+                                    if (speedchange)
+                                    {
+                                        sensor.Control.SetDefault();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
             _computer.Close();
             SaveConfiguration();
             if (_runWebServer.Value)
