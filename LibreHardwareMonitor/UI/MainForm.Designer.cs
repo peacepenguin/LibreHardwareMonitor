@@ -771,7 +771,7 @@ namespace LibreHardwareMonitor.UI
             this.fanCurvesToolStripMenuItem.Name = "fanCurvesToolStripMenuItem";
             this.fanCurvesToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.fanCurvesToolStripMenuItem.Text = "Fan Curves";
-            this.fanCurvesToolStripMenuItem.Click += new System.EventHandler(this.AboutMenuItem_Click);
+            this.fanCurvesToolStripMenuItem.Click += new System.EventHandler(this.FanCurvesMenuItem_Click);
             // 
             // helpMenuItem
             // 

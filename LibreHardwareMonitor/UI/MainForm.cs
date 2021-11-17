@@ -1013,7 +1013,7 @@ namespace LibreHardwareMonitor.UI
 
         private void FanCurvesMenuItem_Click(object sender, EventArgs e)
         {
-            _ = new AboutBox().ShowDialog();
+            _ = new FanCurves().ShowDialog();
         }
 
         private void TreeView_Click(object sender, EventArgs e)
