@@ -48,7 +48,7 @@
             this.Controls.Add(this.comboBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FanCurves";
-            this.Text = "FanCurves";
+            this.Text = "Fan Curves";
             this.ResumeLayout(false);
 
         }
