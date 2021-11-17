@@ -1006,17 +1006,11 @@ namespace LibreHardwareMonitor.UI
                             {
                                 if (string.Equals(sensor.Name, fanAcontrolname))
                                 {
-                                    if (speedchange)
-                                    {
-                                        sensor.Control.SetDefault();
-                                    }
+                                    sensor.Control.SetDefault();
                                 }
                                 if (string.Equals(sensor.Name, fanBcontrolname))
                                 {
-                                    if (speedchange)
-                                    {
-                                        sensor.Control.SetDefault();
-                                    }
+                                    sensor.Control.SetDefault();
                                 }
                             }
                         }
