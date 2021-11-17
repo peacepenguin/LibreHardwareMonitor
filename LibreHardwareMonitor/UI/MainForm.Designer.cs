@@ -59,6 +59,7 @@ namespace LibreHardwareMonitor.UI
             this.fanControllerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hddMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nicMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.psuMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,6 +119,7 @@ namespace LibreHardwareMonitor.UI
             this.runWebServerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.authWebServerMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fanCurvesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -125,7 +127,6 @@ namespace LibreHardwareMonitor.UI
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.splitContainer = new LibreHardwareMonitor.UI.SplitContainerAdv();
             this.treeView = new Aga.Controls.Tree.TreeViewAdv();
-            this.psuMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
@@ -312,6 +313,12 @@ namespace LibreHardwareMonitor.UI
             this.nicMenuItem.Size = new System.Drawing.Size(160, 22);
             this.nicMenuItem.Text = "Network";
             // 
+            // psuMenuItem
+            // 
+            this.psuMenuItem.Name = "psuMenuItem";
+            this.psuMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.psuMenuItem.Text = "Power supplies";
+            // 
             // menuItem6
             // 
             this.menuItem6.Name = "menuItem6";
@@ -416,7 +423,8 @@ namespace LibreHardwareMonitor.UI
             this.loggingIntervalMenuItem,
             this.sensorValuesTimeWindowMenuItem,
             this.webMenuItemSeparator,
-            this.webMenuItem});
+            this.webMenuItem,
+            this.fanCurvesToolStripMenuItem});
             this.optionsMenuItem.Name = "optionsMenuItem";
             this.optionsMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsMenuItem.Text = "Options";
@@ -758,6 +766,13 @@ namespace LibreHardwareMonitor.UI
             this.authWebServerMenuItem.Text = "Authentication";
             this.authWebServerMenuItem.Click += new System.EventHandler(this.AuthWebServerMenuItem_Click);
             // 
+            // fanCurvesToolStripMenuItem
+            // 
+            this.fanCurvesToolStripMenuItem.Name = "fanCurvesToolStripMenuItem";
+            this.fanCurvesToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.fanCurvesToolStripMenuItem.Text = "Fan Curves";
+            this.fanCurvesToolStripMenuItem.Click += new System.EventHandler(this.AboutMenuItem_Click);
+            // 
             // helpMenuItem
             // 
             this.helpMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -845,12 +860,6 @@ namespace LibreHardwareMonitor.UI
             this.treeView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseDown);
             this.treeView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseMove);
             this.treeView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TreeView_MouseUp);
-            // 
-            // psuMenuItem
-            // 
-            this.psuMenuItem.Name = "psuMenuItem";
-            this.psuMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.psuMenuItem.Text = "Power supplies";
             // 
             // MainForm
             // 
@@ -969,6 +978,7 @@ namespace LibreHardwareMonitor.UI
         private ToolStripRadioButtonMenuItem timeWindow24hMenuItem;
         private System.Windows.Forms.ToolStripMenuItem authWebServerMenuItem;
         private System.Windows.Forms.ToolStripMenuItem psuMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fanCurvesToolStripMenuItem;
     }
 }
 

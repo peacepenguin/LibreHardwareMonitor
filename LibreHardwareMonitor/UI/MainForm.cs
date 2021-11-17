@@ -1011,6 +1011,11 @@ namespace LibreHardwareMonitor.UI
             _ = new AboutBox().ShowDialog();
         }
 
+        private void FanCurvesMenuItem_Click(object sender, EventArgs e)
+        {
+            _ = new AboutBox().ShowDialog();
+        }
+
         private void TreeView_Click(object sender, EventArgs e)
         {
             if (!(e is MouseEventArgs m) || (m.Button != MouseButtons.Left && m.Button != MouseButtons.Right))
