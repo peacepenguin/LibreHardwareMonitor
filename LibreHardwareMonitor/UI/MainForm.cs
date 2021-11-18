@@ -64,93 +64,6 @@ namespace LibreHardwareMonitor.UI
         private bool _selectionDragging;
 
 
-
-        string gpuhardwarename = "AMD Radeon RX 6800 XT";
-        string gpusensorname = "GPU Core";
-
-        string cpuhardwarename = "AMD Ryzen 9 5900X";
-        string cpusensorname = "Core (Tctl/Tdie)";
-
-        //string cpuhardwarename = "Intel Core i7-4810MQ";
-        //string cputempname = "CPU Package";
-
-        // Fan identifiers:
-        //ASUS TUF GAMING X570-PLUS, Nuvoton NCT6798D, Fan Control #3, 32.941177, Control //front intake
-        //ASUS TUF GAMING X570-PLUS, Nuvoton NCT6798D, Fan Control #4, 32.941177, Control //rear exhaust
-
-        string fanAhardwarename = "ASUS TUF GAMING X570-PLUS";
-        string fanBhardwarename = "ASUS TUF GAMING X570-PLUS";
-        string fanAsubhardwarename = "Nuvoton NCT6798D";
-        string fanBsubhardwarename = "Nuvoton NCT6798D";
-        string fanAsensorname = "Fan #3";
-        string fanBsensorname = "Fan #4";
-        string fanAcontrolname = "Fan Control #3";
-        string fanBcontrolname = "Fan Control #4";
-
-        int fanArpm = 0;
-        int fanBrpm = 0;
-
-
-
-        //fan curve:
-
-        // we're using the CPU and GPU as an aggregate input,
-        // take the SUM of the temperatures, and adjust the curve to that temp.
-        // The total heat of the system = ~ CPU + GPU temp
-        // when controlling chassis fans, the entire system load should be considered
-        // when controlling aio pumps, or cpu fans, only the cpu load should be considered
-
-        // initial point on the curve, defines the lowest possible fan speed:
-        static float curveAtemp1 = 80;
-        static float curveAspeed1 = 20;
-
-        // light load point
-        static float curveAtemp2 = 100;
-        static float curveAspeed2 = 40;
-
-        // medium load point
-        static float curveAtemp3 = 120;
-        static float curveAspeed3 = 80;
-
-        // max load point
-        static float curveAtemp4 = 140;
-        static float curveAspeed4 = 100;  //final point should always be 100, or the "max" value for the curve.
-
-        // hysterysis value (ie. don't change the fan speed unless the new temp is <value> more or less than the temp when the speed was set most recently)
-        int temphysterysis = 8;
-
-        bool speedchange = false;
-
-
-        // end config 
-
-        // get the slope of the points:    each point of curve is just an (x, y) coordinate. x is temp, y is speed on our fan curve.
-        static float slope1to2 = (curveAspeed2 - curveAspeed1) / (curveAtemp2 - curveAtemp1);
-        static float slope2to3 = (curveAspeed3 - curveAspeed2) / (curveAtemp3 - curveAtemp2);
-        static float slope3to4 = (curveAspeed4 - curveAspeed3) / (curveAtemp4 - curveAtemp3);
-
-        //calculate the lines 'b' value (from the Direct method/equation to a line)
-        float slope1to2bvalue = curveAspeed1 - (slope1to2 * curveAtemp1);
-        float slope2to3bvalue = curveAspeed2 - (slope2to3 * curveAtemp2);
-        float slope3to4bvalue = curveAspeed3 - (slope3to4 * curveAtemp3);
-
-
-        // doing bvalue calcs in advance now instead of in the loop for efficiency 
-        //float bvalue;
-
-
-        float gpucurrenttemp = 0;
-        float cpucurrenttemp = 0;
-
-        float sumoftemps = 0;
-        float sumoftempslastused = 0;
-
-
-        int speedtoset = 40;  //set an initial value to ensure the fans are set to something besides null or 0 if an exception occurs.
-        int speedlastset = 0;
-
-
-
         public MainForm()
         {
             InitializeComponent();
@@ -747,9 +660,9 @@ namespace LibreHardwareMonitor.UI
             {
                 foreach (ISensor sensor in hardware.Sensors)
                 {
-                    if (string.Equals(hardware.Name, gpuhardwarename) || string.Equals(hardware.Name, cpuhardwarename))
+                    if (string.Equals(hardware.Name, Program.Gpuhardwarename) || string.Equals(hardware.Name, Program.Cpuhardwarename))
                     {
-                        if (string.Equals(sensor.Name, gpusensorname))
+                        if (string.Equals(sensor.Name, Program.Gpusensorname))
                         {
                             if (string.Equals(sensor.SensorType.ToString(), "Temperature"))
                             {
@@ -757,11 +670,11 @@ namespace LibreHardwareMonitor.UI
                                 //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", hardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
 
                                 //now that we've recorded the previous results, update gpucurrenttemp from the sensor object:
-                                gpucurrenttemp = (int)Math.Round((float)sensor.Value, 0);
+                                Program.Gpucurrenttemp = (int)Math.Round((float)sensor.Value, 0);
                             }
                         }
 
-                        if (string.Equals(sensor.Name, cpusensorname))
+                        if (string.Equals(sensor.Name, Program.Cpusensorname))
                         {
                             if (string.Equals(sensor.SensorType.ToString(), "Temperature"))
                             {
@@ -769,7 +682,7 @@ namespace LibreHardwareMonitor.UI
                                 //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", hardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
 
                                 //now that we've recorded the previous results, update cpucurrenttemp from the sensor object:
-                                cpucurrenttemp = (int)Math.Round((float)sensor.Value, 0);
+                                Program.Cpucurrenttemp = (int)Math.Round((float)sensor.Value, 0);
                             }
                         }
                     }
@@ -783,21 +696,21 @@ namespace LibreHardwareMonitor.UI
             //Console.WriteLine("...processing data...");
 
             // now that we have all the current temps, add them together for the fan curves usage:
-            sumoftemps = cpucurrenttemp + gpucurrenttemp;
+            Program.Sumoftemps = Program.Cpucurrenttemp + Program.Gpucurrenttemp;
 
 
             //calculate the temp from the slope value:
             // first find what slope to use, what points is the current value between:
             // see if its smaller than the first point, and just set to that points value:
-            if (sumoftemps <= curveAtemp1)
+            if (Program.Sumoftemps <= Program.CurveAtemp1)
             {
                 //convert float to int, with rounding to nearest (normal rounding), 0 decimal points.
-                speedtoset = (int)Math.Round(curveAspeed1, 0);
+                Program.Speedtoset = (int)Math.Round(Program.CurveAspeed1, 0);
             }
 
             else
             {
-                if (sumoftemps < curveAtemp2)
+                if (Program.Sumoftemps < Program.CurveAtemp2)
                 {
                     // use the slope for this position to get the speed to set:
                     // take the x, y coord of point 1, and the slope value, to calc the current temps x, y coord
@@ -812,26 +725,26 @@ namespace LibreHardwareMonitor.UI
 
                     // bvalue = curveAspeed1 - (slope1to2 * curveAtemp1); moved bvalue calcs to global section, one less math to do each loop.
 
-                    speedtoset = (int)Math.Round((slope1to2 * sumoftemps + slope1to2bvalue), 0);
+                    Program.Speedtoset = (int)Math.Round((Program.Slope1to2 * Program.Sumoftemps + Program.Slope1to2bvalue), 0);
                 }
                 else
                 {
-                    if (sumoftemps < curveAtemp3)
+                    if (Program.Sumoftemps < Program.CurveAtemp3)
                     {
                         //bvalue = curveAspeed2 - (slope2to3 * curveAtemp2);
-                        speedtoset = (int)Math.Round((slope2to3 * sumoftemps + slope2to3bvalue), 0);
+                        Program.Speedtoset = (int)Math.Round((Program.Slope2to3 * Program.Sumoftemps + Program.Slope2to3bvalue), 0);
                     }
                     else
                     {
-                        if (sumoftemps < curveAtemp4)
+                        if (Program.Sumoftemps < Program.CurveAtemp4)
                         {
                             //bvalue = curveAspeed3 - (slope3to4 * curveAtemp3);
-                            speedtoset = (int)Math.Round((slope3to4 * sumoftemps + slope3to4bvalue), 0);
+                            Program.Speedtoset = (int)Math.Round((Program.Slope3to4 * Program.Sumoftemps + Program.Slope3to4bvalue), 0);
                         }
                         else
                         {
                             //only way to be here is equal to or greater than curveAtemp4 by definition, so just set the value:
-                            speedtoset = (int)Math.Round(curveAspeed4, 0);
+                            Program.Speedtoset = (int)Math.Round(Program.CurveAspeed4, 0);
                         }
                     }
                 }
@@ -842,15 +755,15 @@ namespace LibreHardwareMonitor.UI
 
             // check the hysterysis value to ensure we should actually set a new speed value, AND ensure the speed determined isn't the same as the last value set
             // (ie, if we've already hit the floor or ceiling speeds of the curve, the temp hysterysis check might pass, but the speed would be the same still)
-            if (((Math.Abs(sumoftemps - sumoftempslastused)) >= temphysterysis) && (speedtoset != speedlastset))
+            if (((Math.Abs(Program.Sumoftemps - Program.Sumoftempslastused)) >= Program.Temphysterysis) && (Program.Speedtoset != Program.Speedlastset))
             {
-                sumoftempslastused = sumoftemps;
-                speedlastset = speedtoset;
-                speedchange = true;
+                Program.Sumoftempslastused = Program.Sumoftemps;
+                Program.Speedlastset = Program.Speedtoset;
+                Program.Speedchange = true;
             }
             else
             {
-                speedchange = false;
+                Program.Speedchange = false;
             }
 
 
@@ -862,43 +775,43 @@ namespace LibreHardwareMonitor.UI
             foreach (IHardware hardware in _computer.Hardware)
             {
 
-                if (string.Equals(hardware.Name, fanAhardwarename) || string.Equals(hardware.Name, fanBhardwarename))
+                if (string.Equals(hardware.Name, Program.FanAhardwarename) || string.Equals(hardware.Name, Program.FanBhardwarename))
                 {
                     foreach (IHardware subhardware in hardware.SubHardware)
                     {
-                        if (string.Equals(subhardware.Name, fanAsubhardwarename) || string.Equals(subhardware.Name, fanBsubhardwarename))
+                        if (string.Equals(subhardware.Name, Program.FanAsubhardwarename) || string.Equals(subhardware.Name, Program.FanBsubhardwarename))
                         {
                             foreach (ISensor sensor in subhardware.Sensors)
                             {
-                                if (string.Equals(sensor.Name, fanAsensorname))
+                                if (string.Equals(sensor.Name, Program.FanAsensorname))
                                 {
                                     //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}", hardware.Name, subhardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
-                                    fanArpm = (int)Math.Round((float)sensor.Value, 0);
+                                    Program.FanArpm = (int)Math.Round((float)sensor.Value, 0);
                                 }
 
-                                if (string.Equals(sensor.Name, fanBsensorname))
+                                if (string.Equals(sensor.Name, Program.FanBsensorname))
                                 {
                                     //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}", hardware.Name, subhardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
-                                    fanBrpm = (int)Math.Round((float)sensor.Value, 0);
+                                    Program.FanBrpm = (int)Math.Round((float)sensor.Value, 0);
                                 }
 
-                                if (string.Equals(sensor.Name, fanAcontrolname))
+                                if (string.Equals(sensor.Name, Program.FanAcontrolname))
                                 {
                                     //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}", hardware.Name, subhardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
 
-                                    if (speedchange)
+                                    if (Program.Speedchange)
                                     {
-                                        sensor.Control.SetSoftware(speedtoset);
+                                        sensor.Control.SetSoftware(Program.Speedtoset);
                                     }
                                 }
 
-                                if (string.Equals(sensor.Name, fanBcontrolname))
+                                if (string.Equals(sensor.Name, Program.FanBcontrolname))
                                 {
                                     //Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}", hardware.Name, subhardware.Name, sensor.Name, sensor.Value, sensor.SensorType, sensor.Index, sensor.Identifier);
 
-                                    if (speedchange)
+                                    if (Program.Speedchange)
                                     {
-                                        sensor.Control.SetSoftware(speedtoset);
+                                        sensor.Control.SetSoftware(Program.Speedtoset);
                                     }
                                 }
                             }
@@ -996,19 +909,19 @@ namespace LibreHardwareMonitor.UI
             // set all fan curve controlled fans back to "default" ie. bios controlled.
             foreach (IHardware hardware in _computer.Hardware)
             {
-                if (string.Equals(hardware.Name, fanAhardwarename) || string.Equals(hardware.Name, fanBhardwarename))
+                if (string.Equals(hardware.Name, Program.FanAhardwarename) || string.Equals(hardware.Name, Program.FanBhardwarename))
                 {
                     foreach (IHardware subhardware in hardware.SubHardware)
                     {
-                        if (string.Equals(subhardware.Name, fanAsubhardwarename) || string.Equals(subhardware.Name, fanBsubhardwarename))
+                        if (string.Equals(subhardware.Name, Program.FanAsubhardwarename) || string.Equals(subhardware.Name, Program.FanBsubhardwarename))
                         {
                             foreach (ISensor sensor in subhardware.Sensors)
                             {
-                                if (string.Equals(sensor.Name, fanAcontrolname))
+                                if (string.Equals(sensor.Name, Program.FanAcontrolname))
                                 {
                                     sensor.Control.SetDefault();
                                 }
-                                if (string.Equals(sensor.Name, fanBcontrolname))
+                                if (string.Equals(sensor.Name, Program.FanBcontrolname))
                                 {
                                     sensor.Control.SetDefault();
                                 }

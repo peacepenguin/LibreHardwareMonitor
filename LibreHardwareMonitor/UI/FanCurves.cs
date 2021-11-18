@@ -16,5 +16,6 @@ namespace LibreHardwareMonitor.UI
         {
             InitializeComponent();
         }
+
     }
 }
