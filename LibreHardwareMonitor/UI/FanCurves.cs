@@ -15,6 +15,8 @@ namespace LibreHardwareMonitor.UI
         public FanCurves()
         {
             InitializeComponent();
+
+            dynamiclabelhysteresis.Text = Program.Temphysterysis.ToString();
         }
 
     }
